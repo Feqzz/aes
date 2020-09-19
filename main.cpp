@@ -112,10 +112,8 @@ void printOneLine(uint8_t arr[4][4])
 			}
 			std::cout << std::hex << (int)arr[i][j];
 		}
-		//std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	//std::cout << "--------------------------------" << std::endl;
 }
 
 void printOneLinePlain(uint8_t arr[4][4])
@@ -131,28 +129,9 @@ void printOneLinePlain(uint8_t arr[4][4])
 			}
 			std::cout << (char)arr[i][j];
 		}
-		//std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	//std::cout << "--------------------------------" << std::endl;
 }
-
-/*
-void charArrayXor(uint8_t a[4][4], uint8_t b[4][4], uint8_t c[4][4])
-{
-	char ret[4][4];
-
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			ret[i][j] = (uint8_t)(a[i][j] ^ b[i][j]);
-		}
-	}
-	
-	std::copy(&ret[0][0], &ret[0][0] + 16, &c[0][0]);
-}
-*/
 
 void subBytes(uint8_t a[4][4])
 {
@@ -165,7 +144,6 @@ void subBytes(uint8_t a[4][4])
 			std::string result(stream.str());
 
 			int left, right;
-
 			std::stringstream().swap(stream);
 
 			if (result.length() < 2)
@@ -179,15 +157,8 @@ void subBytes(uint8_t a[4][4])
 			}
 
 			std::stringstream().swap(stream);
-
 			stream << std::hex << result.back();
 			stream >> std::hex >> right;
-
-			//std::cout << "inside: " << std::hex << a[i][j] << "    " << std::hex << (int)a[i][j] << std::endl;
-
-			//std::cout << "left: " << left << " right: " << right << std::endl;
-
-			//std::cout << std::hex << (int)sbox[right + (16 * left)] << std::endl;
 			a[i][j] = sbox[right + (16 * left)];
 		}
 	}
@@ -221,12 +192,6 @@ void invSubBytes(uint8_t a[4][4])
 
 			stream << std::hex << result.back();
 			stream >> std::hex >> right;
-
-			//std::cout << "inside: " << std::hex << a[i][j] << "    " << std::hex << (int)a[i][j] << std::endl;
-
-			//std::cout << "left: " << left << " right: " << right << std::endl;
-
-			//std::cout << std::hex << (int)sbox[right + (16 * left)] << std::endl;
 			a[i][j] = rsbox[right + (16 * left)];
 		}
 	}
@@ -253,9 +218,7 @@ void invShiftRows(uint8_t a[4][4])
 		for (int j = 0; j < 4; j++)
 		{
 			b[j][i] = a[(((j - i) % 4) + 4) % 4][i];
-			//std::cout << std::hex << (int)a[j][i] << " --> " << std::hex << (int)a[(((j - i) % 4) + 4) % 4][i] << std::endl;
 		}
-		//std::cout << std::endl;
 	}
 	std::copy(&b[0][0], &b[0][0]+4*4,&a[0][0]);
 }
@@ -296,10 +259,6 @@ void invMixColumns(uint8_t a[4][4])
 	uint8_t a11[4];
 	uint8_t a13[4];
 	uint8_t a14[4];
-	//uint8_t y = a14 ^ a11 ^ a13 ^ a9;
-
-	//std::cout << std::hex << (int)y << std::endl;
-
 	for (int i = 0; i < 4; i++)
 	{
 		uint8_t tmp[4][4];
@@ -310,23 +269,10 @@ void invMixColumns(uint8_t a[4][4])
 			tmp[1][j] = wasd(wasd(wasd(a[i][(1 + j) % 4])) ^ a[i][(1 + j) % 4]) ^ a[i][(1 + j) % 4];
 			tmp[2][j] = wasd(wasd(wasd(a[i][(2 + j) % 4]) ^ a[i][(2 + j) % 4])) ^ a[i][(2 + j) % 4];
 			tmp[3][j] = wasd(wasd(wasd(a[i][(3 + j) % 4]))) ^ a[i][(3 + j) % 4];
-			
-			
-			
-			/*
-			a9[j] = wasd(wasd(wasd(x[(3 + j) % 4]))) ^ x[(3 + j) % 4];
-			a11[j] = wasd(wasd(wasd(x[(1 + j) % 4])) ^ x[(1 + j) % 4]) ^ x[(1 + j) % 4];
-			a13[j] = wasd(wasd(wasd(x[(2 + j) % 4]) ^ x[(2 + j) % 4])) ^ x[(2 + j) % 4];
-			a14[j] = wasd(wasd(wasd(x[(0 + j) % 4]) ^ x[(0 + j) % 4]) ^ x[(0 + j) % 4]);
-			*/
 		}
-
-		//std::cout << (int)(a14[0] ^ a11[0] ^ a13[0] ^ a9[0]) << std::endl;
-
 		for (int k = 0; k < 4; k++)
 		{
 			a[i][k] = tmp[(((0 - k) % 4) + 4) % 4][k] ^ tmp[(((1 - k) % 4) + 4) % 4][k] ^ tmp[(((2 - k) % 4) + 4) % 4][k] ^ tmp[(((3 - k) % 4) + 4) % 4][k];
-			//std::cout << std::hex << (int)y[k] << std::endl;
 		}
 	}
 
@@ -399,12 +345,6 @@ void subBytesRow(uint8_t a[4])
 
 		stream << std::hex << result.back();
 		stream >> std::hex >> right;
-
-		//std::cout << "inside: " << std::hex << a[i] << "    " << std::hex << (int)a[i] << std::endl;
-
-		//std::cout << "left: " << left << " right: " << right << std::endl;
-
-		//std::cout << std::hex << (int)sbox[right + (16 * left)] << std::endl;
 		a[i] = sbox[right + (16 * left)];
 	}
 }
@@ -413,8 +353,6 @@ void subBytesRow(uint8_t a[4])
 
 void keySchedule(uint8_t cipherKey[4][4], uint8_t ok[44][4])
 {
-	//uint8_t ok[44][4];
-
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
@@ -442,17 +380,7 @@ void keySchedule(uint8_t cipherKey[4][4], uint8_t ok[44][4])
 		for (int j = 0; j < 4; j++)
 		{
 			ok[i][j] = (i % 4 == 0) ? (ok[i - 4][j] ^ tmp[j] ^ tmpRcon[j]) : (ok[i - 4][j] ^ tmp[j]);
-
-			if (i % 4 == 0)
-			{
-				//std::cout << std::hex << (int)ok[i - 4][j] << " XOR " << std::hex << (int)tmp[j] << " XOR " << std::hex << (int)tmpRcon[j]  << " = " << std::hex << (int)ok[i][j] << std::endl;
-			}
-			else
-			{
-				//std::cout << std::hex << (int)ok[i - 4][j] << " XOR " << std::hex << (int)tmp[j] << " = " << std::hex << (int)ok[i][j] << std::endl;
-			}
 		}
-		//std::cout << std::endl;
 	}
 }
 
