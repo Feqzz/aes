@@ -101,7 +101,7 @@ void printArrayHex(uint8_t arr[4][4])
 
 void printOneLine(uint8_t arr[4][4])
 {
-	std::cout << "--------------------------------" << std::endl;
+	std::cout << "hex: ";
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
@@ -115,7 +115,26 @@ void printOneLine(uint8_t arr[4][4])
 		//std::cout << std::endl;
 	}
 	std::cout << std::endl;
-	std::cout << "--------------------------------" << std::endl;
+	//std::cout << "--------------------------------" << std::endl;
+}
+
+void printOneLinePlain(uint8_t arr[4][4])
+{
+	std::cout << "plaintext: ";
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			if ((int)arr[i][j] - 10 < 0)
+			{
+				std::cout << "0";
+			}
+			std::cout << (char)arr[i][j];
+		}
+		//std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	//std::cout << "--------------------------------" << std::endl;
 }
 
 /*
@@ -137,9 +156,6 @@ void charArrayXor(uint8_t a[4][4], uint8_t b[4][4], uint8_t c[4][4])
 
 void subBytes(uint8_t a[4][4])
 {
-	
-
-
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
@@ -175,7 +191,45 @@ void subBytes(uint8_t a[4][4])
 			a[i][j] = sbox[right + (16 * left)];
 		}
 	}
+}
 
+void invSubBytes(uint8_t a[4][4])
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			std::stringstream stream;
+			stream << std::hex << (int)a[i][j];
+			std::string result(stream.str());
+
+			int left, right;
+
+			std::stringstream().swap(stream);
+
+			if (result.length() < 2)
+			{
+				left = 0;
+			}
+			else
+			{
+				stream << std::hex << result[0];
+				stream >> std::hex >> left;
+			}
+
+			std::stringstream().swap(stream);
+
+			stream << std::hex << result.back();
+			stream >> std::hex >> right;
+
+			//std::cout << "inside: " << std::hex << a[i][j] << "    " << std::hex << (int)a[i][j] << std::endl;
+
+			//std::cout << "left: " << left << " right: " << right << std::endl;
+
+			//std::cout << std::hex << (int)sbox[right + (16 * left)] << std::endl;
+			a[i][j] = rsbox[right + (16 * left)];
+		}
+	}
 }
 
 void shiftRows(uint8_t a[4][4])
@@ -191,53 +245,24 @@ void shiftRows(uint8_t a[4][4])
 	std::copy(&b[0][0], &b[0][0]+4*4,&a[0][0]);
 }
 
-void gmix_column(uint8_t r[4])
+void invShiftRows(uint8_t a[4][4])
 {
-
-    uint8_t a[4];
-
-    uint8_t b[4];
-
-    uint8_t c;
-
-    uint8_t h;
-
-    /* The array 'a' is simply a copy of the input array 'r'
-
-     * The array 'b' is each element of the array 'a' multiplied by 2
-
-     * in Rijndael's Galois field
-
-     * a[n] ^ b[n] is element n multiplied by 3 in Rijndael's Galois field */ 
-
-    for (c = 0; c < 4; c++)
-    {
-        a[c] = r[c];
-
-        /* h is 0xff if the high bit of r[c] is set, 0 otherwise */
-
-        h = (unsigned char)((signed char)r[c] >> 7); /* arithmetic right shift, thus shifting in either zeros or ones */
-
-        b[c] = r[c] << 1; /* implicitly removes high bit because b[c] is an 8-bit char, so we xor by 0x1b and not 0x11b in the next line */
-
-        b[c] ^= 0x1B & h; /* Rijndael's Galois field */
-
-    }
-
-    r[0] = b[0] ^ a[3] ^ a[2] ^ b[1] ^ a[1]; /* 2 * a0 + a3 + a2 + 3 * a1 */
-
-    r[1] = b[1] ^ a[0] ^ a[3] ^ b[2] ^ a[2]; /* 2 * a1 + a0 + a3 + 3 * a2 */
-
-    r[2] = b[2] ^ a[1] ^ a[0] ^ b[3] ^ a[3]; /* 2 * a2 + a1 + a0 + 3 * a3 */
-
-    r[3] = b[3] ^ a[2] ^ a[1] ^ b[0] ^ a[0]; /* 2 * a3 + a2 + a1 + 3 * a0 */
-
+	uint8_t b[4][4];
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			b[j][i] = a[(((j - i) % 4) + 4) % 4][i];
+			//std::cout << std::hex << (int)a[j][i] << " --> " << std::hex << (int)a[(((j - i) % 4) + 4) % 4][i] << std::endl;
+		}
+		//std::cout << std::endl;
+	}
+	std::copy(&b[0][0], &b[0][0]+4*4,&a[0][0]);
 }
 
-void mixColumns(uint8_t a[4][4], uint8_t b[4][4])
-{
-	
 
+void mixColumns(uint8_t a[4][4])
+{
 	for (int i = 0; i < 4; i++)
 	{
 		uint8_t tmp[4];
@@ -255,6 +280,56 @@ void mixColumns(uint8_t a[4][4], uint8_t b[4][4])
 		a[i][2] = multi[2] ^ tmp[1] ^ tmp[0] ^ multi[3] ^ tmp[3];
 		a[i][3] = multi[3] ^ tmp[2] ^ tmp[1] ^ multi[0] ^ tmp[0];
 	}
+}
+
+uint8_t wasd(uint8_t a)
+{
+	uint8_t h = (unsigned char)((signed char)a >> 7);
+	return ((a << 1) ^ 0x1b & h);
+}
+
+void invMixColumns(uint8_t a[4][4])
+{
+	uint8_t x[4] = {0x9f, 0xdc, 0x58, 0x9d};
+	uint8_t y[4];
+	uint8_t a9[4];
+	uint8_t a11[4];
+	uint8_t a13[4];
+	uint8_t a14[4];
+	//uint8_t y = a14 ^ a11 ^ a13 ^ a9;
+
+	//std::cout << std::hex << (int)y << std::endl;
+
+	for (int i = 0; i < 4; i++)
+	{
+		uint8_t tmp[4][4];
+
+		for (int j = 0; j < 4; j++)
+		{
+			tmp[0][j] = wasd(wasd(wasd(a[i][(0 + j) % 4]) ^ a[i][(0 + j) % 4]) ^ a[i][(0 + j) % 4]);
+			tmp[1][j] = wasd(wasd(wasd(a[i][(1 + j) % 4])) ^ a[i][(1 + j) % 4]) ^ a[i][(1 + j) % 4];
+			tmp[2][j] = wasd(wasd(wasd(a[i][(2 + j) % 4]) ^ a[i][(2 + j) % 4])) ^ a[i][(2 + j) % 4];
+			tmp[3][j] = wasd(wasd(wasd(a[i][(3 + j) % 4]))) ^ a[i][(3 + j) % 4];
+			
+			
+			
+			/*
+			a9[j] = wasd(wasd(wasd(x[(3 + j) % 4]))) ^ x[(3 + j) % 4];
+			a11[j] = wasd(wasd(wasd(x[(1 + j) % 4])) ^ x[(1 + j) % 4]) ^ x[(1 + j) % 4];
+			a13[j] = wasd(wasd(wasd(x[(2 + j) % 4]) ^ x[(2 + j) % 4])) ^ x[(2 + j) % 4];
+			a14[j] = wasd(wasd(wasd(x[(0 + j) % 4]) ^ x[(0 + j) % 4]) ^ x[(0 + j) % 4]);
+			*/
+		}
+
+		//std::cout << (int)(a14[0] ^ a11[0] ^ a13[0] ^ a9[0]) << std::endl;
+
+		for (int k = 0; k < 4; k++)
+		{
+			a[i][k] = tmp[(((0 - k) % 4) + 4) % 4][k] ^ tmp[(((1 - k) % 4) + 4) % 4][k] ^ tmp[(((2 - k) % 4) + 4) % 4][k] ^ tmp[(((3 - k) % 4) + 4) % 4][k];
+			//std::cout << std::hex << (int)y[k] << std::endl;
+		}
+	}
+
 }
 
 void addRoundKey(uint8_t a[4][4], uint8_t b[4][4])
@@ -406,12 +481,11 @@ void fromHex(std::string str, uint8_t ret[4][4])
 			ret[i][j] = std::stoi(str.substr((2*j)+(8*i), 2), 0, 16);
 		}
 	}
-	printArrayHex(ret);
 }
 
 void printUsage()
 {
-	std::cout << "Usage: ./aes <encrypt/decrypt> <-p/-h> <text> <-p/-h> <key>" << std::endl;
+	std::cout << "Usage: ./aes encrypt/decrypt -p/-h <text> -p/-h <key>" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -531,6 +605,7 @@ int main(int argc, char** argv)
 
 	if (encrypt)
 	{
+		std::cout << "-------- Encrypting --------" << std::endl;
 		keySchedule(roundKey, fullKey);
 		updateRoundKey(fullKey, roundKey, 0);
 		addRoundKey(state, roundKey);
@@ -539,7 +614,7 @@ int main(int argc, char** argv)
 			subBytes(state);
 			shiftRows(state);
 			//printArrayHex(state);
-			mixColumns(state, state);
+			mixColumns(state);
 			//printArrayHex(state);
 			updateRoundKey(fullKey, roundKey, i);
 			addRoundKey(state, roundKey);
@@ -553,81 +628,29 @@ int main(int argc, char** argv)
 		//printArrayHex(state);
 		printOneLine(state);
 	}
-
-	//printArrayHex(roundKey);
-
-	//fillArr(state, one);
-	//fillArr(roundKey, key);
-
-	
-	//printKeySchedule(fullKey);
-
-	
-
-	//printArrayHex(roundKey);
-
-	
-
-	
-
-
-	//fromHex(text, state);
-	//fromHex(key, roundKey);
-
-	//std::cout << key.size();
-	//return 0;
-
-	//std::string one = "HelloHadebra";
-	//std::string key = "12345678abcdefgh";
-	//std::string key = "+~(®Ò¦«÷";
-
-	/*
-	if (one.length() > 16 or key.length() > 16 )
+	else
 	{
-		std::cout << "Input text or key is larger than 128bit" << std::endl;
-		return 0;
+		std::cout << "-------- Decrypting --------" << std::endl;
+		keySchedule(roundKey, fullKey);
+		updateRoundKey(fullKey, roundKey, 10);
+		addRoundKey(state, roundKey);
+		invShiftRows(state);
+		invSubBytes(state);
+		
+		for (int i = 9; i >= 1; i--)
+		{
+			updateRoundKey(fullKey, roundKey, i);
+			addRoundKey(state, roundKey);
+			invMixColumns(state);
+			invShiftRows(state);
+			invSubBytes(state);
+		}
+
+		updateRoundKey(fullKey, roundKey, 0);
+		addRoundKey(state, roundKey);
+		printOneLine(state);
+		printOneLinePlain(state);
 	}
-
-	uint8_t a[4][4];
-	std::string s = "6bc1bee22e409f96e93d7e117393172a";
-
-	fromHex(s, a);
-
-	return 0;
-	*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//fillString(one);
-	//fillString(key);
-
-	
-	//uint8_t state[4][4] = {0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34};
-	//uint8_t state[4][4] = {'t', 'e', 'c', 'h', 'n', 'i', 'p', 'f', 'm', 'c', '2', '0', '2', '1', '<', '3'};
-	//uint8_t roundKey[4][4] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
-	
-
-	//std::string text1 = "546563686e6970666d63323032313c33";
-	//std::string key1 = "2b7e151628aed2a6abf7158809cf4f3c";
-
-	
-
-	//roundKey[0] = {0x2b, 0x7e, 0x15, 0x16};
 
 	return 0;
 }
