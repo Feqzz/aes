@@ -1,5 +1,5 @@
 # AES
-A simple C++ implementation of the **A**dvanced **E**ncryption **S**tandard. Created for learning purposes.
+A simple C++ implementation of the **A**dvanced **E**ncryption **S**tandard. Created for learning purposes. It only supports 128-bit keys and input.
 
 ## Usage
 ```
